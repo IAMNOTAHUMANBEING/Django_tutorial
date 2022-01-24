@@ -10,7 +10,8 @@ class Question(models.Model):
         return self.question_text
 
     def was_published_recently(self):
-        return self.pub_date >= timezone.now() - datetime.timedelta(days=1)
+        now = timezone.now()
+        return now - datetime.timedelta(days=1) <= self.pub_date <= now
 
 class Choice(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)    # Choice는 항상 Question과 연결됨, 질문이 삭제되면 연결된 선택지도 삭제됨
