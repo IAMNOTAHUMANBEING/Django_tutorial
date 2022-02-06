@@ -30,8 +30,8 @@ class ResultsView(generic.DetailView):
 def vote(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
     try:
-        selected_choice = question.choice_set.get(pk=request.POST['choice'])    # POST로 전달받은 값 중에 choice 항목의 value 반환
-    except (KeyError, Choice.DoesNotExist):                                     # ex. request_POST = { 'choice' : 1}
+        selected_choice = question.choice_set.get(pk=request.POST['choice'])    # POST로 전달받은 값 중에 choice 항목의 value 반환 ex. request_POST = { 'choice' : 1}
+    except (KeyError, Choice.DoesNotExist):     # 키가 없는 경우와 검색 조건에 맞는 객체가 없는 경우
         return render(request, 'polls/detail.html', {
             'question': question,
             'error_message': "You didn't select a choice.",
@@ -41,7 +41,7 @@ def vote(request, question_id):
         selected_choice.save()  # 계산하고 저장도 따로 해줘야 함
         # POST를 성공적으로 전달 받고 나면 리다이렉트를 항상 해주어야 함
         # 사용자가 뒤로 가기 버튼을 눌러서 data가 두번 POST 되는 일을 막아줌
-        return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
+        return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))  # URL 패턴: URL 스트링 <-> 뷰, 리버스: 패턴으로부터 스트링을 구함
 
 # def index(request):
 #     latest_question_list = Question.objects.order_by('-pub_date')[:5]
