@@ -20,10 +20,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-8x53#$8wjo^ii6so9&p=_+2d$^auotqcvt@)0&!mi+jm+v@ba1'
+with open(os.path.join(BASE_DIR, 'www_dir', 'secret_key.txt')) as f:
+    SECRET_KEY = f.read().strip()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -31,6 +32,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'books.apps.BooksConfig',
+    #'books'로 등록하면 app 활용 적용이 안됨. 설정클래스로 등록하는 것이 정확한 방법인 이유
     'polls.apps.PollsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -77,8 +80,8 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+        'NAME': os.path.join(BASE_DIR, 'db', 'db.sqlite3'),
+    },
 }
 
 
@@ -117,9 +120,41 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'www_dir', 'static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Logging: 디폴트 로깅 설정은 site-packages/django/utils/log.py에 있음
+LOGGING_CONFIG = 'logging.config.dictConfig'    # 생략가능, 디폴트 설정 무시할 땐 None 으로 선언
+LOGGING = {
+    'version': 1,   # 설정의 형식
+    'disable_existing_loggers': False,  # 기존의 로거들을 비활성화 하지 않음, 장고에서 False 권장
+    'formatters': {
+        'verbose': { # verbose 포맷터는 [로그메세지 기록한 시간], 로그레벨이름, [로거이름:라인번호], 로그메세지 순으로 출력
+            'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt': "%d/%b/%Y %H:%M:%S"  # 기록한 시간에 대한 포맷 날짜/월축약형/연도 시(24시 기준):분:초 형식
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'mysite.log'),
+            'formatter': 'verbose'
+        },
+        # file 핸들러는 DEBUG 이상의 메세지를 파일 출력해주는 클래스를 사용 그리고 verbose 포맷터 사용, 로그가 기록되는 파일 위치도 지정
+    },
+    'loggers':{ # 두개의 로거 설정
+        'polls':{
+            'handlers': ['file'],
+            'level': 'DEBUG',
+        },
+    },
+}
+
+

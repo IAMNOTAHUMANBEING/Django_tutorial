@@ -1,9 +1,7 @@
 from django.urls import path
-from django.contrib import admin
 from . import views
 
 app_name = 'polls' # {% url %} 사용시 어떤 앱의 url.py를 이용하는지 알려주는 기능
-
 urlpatterns = [
     # 제네릭 뷰, URL 패턴 매칭 위에서 아래로 진행하므로 정의하는 순서 유의
     path('', views.IndexView.as_view(), name='index'),

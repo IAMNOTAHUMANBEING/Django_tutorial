@@ -1,22 +1,20 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <title>detail</title>
-</head>
-<body>
-<form action="{% url 'polls:vote' question.id %}" method="post">
-{% csrf_token %}
+{% extends "base_polls.html" %}
+
+{% block content %}
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 <fieldset>
-    <legend><h1>{{ question.question_text }}</h1></legend>
+    <legend> <h1>{{ question.question_text }}</h1> </legend>
     {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-    {% for choice in question.choice_set.all %} <!-- -->
-        <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+    <form action="{% url 'polls:vote' question.id %}" method="post"> <!-- 폼은 서버로 제출되는 구조화된 데이터, 폼을 만드는 폼 클래스는 <input>과 매핑 됨 -->
+        {% csrf_token %}                                             <!-- 폼 객체는 주로 뷰 함수에서 생성하는데 데이터를 채워서 만들 것인지 아닌지를 구분해야함 -->
+        {% for choice in question.choice_set.all %}                  <!-- POST 방식의 form을 사용할 때 필요, 외부URL로 보내는 form에 사용하면 토큰 값이 유출될 수 있으므로 주의 -->
+        <input type="radio" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}" />
         <!-- form을 제출하면 Post방식으로 name 선택지를 그룹핑해서 중복선택 안되게 함. name:value 서버로 전송, id는 아래 label for 짝 이룸-->
-        <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br>
-    {% endfor %}
+        <label for="choice{{ forloop.counter }}">{{ choice.choice_text }}</label><br/>
+        {% endfor %}
+        <input type="submit" value="vote"/>
+    </form>
 </fieldset>
-<input type="submit" value="Vote">
-</form>
-</body>
-</html>
+{% endblock content %}
+

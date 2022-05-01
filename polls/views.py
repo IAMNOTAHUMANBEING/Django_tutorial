@@ -4,20 +4,28 @@ from .models import Question, Choice
 from django.shortcuts import render, get_object_or_404
 from django.views import generic
 from django.utils import timezone
+import logging
+logger = logging.getLogger(__name__)    # polls.views 로거 객체 취득, __name__은 모듈경로를 담고 있는 파이썬 내장 변수
+# view.py 파일의 모듈경로는 polls.views이고 이것이 우리가 사용하고자 하는 로거의 객체의 이름
+# 이 로거에서 생산한 로거 레코드는 상위 polls 로거에게 전파되고 polls 로거에서 메세지를 기록합니다.
+# 이 동작을 위해 setting.py에 polls 로거를 설정함.
 
 # 제네릭 뷰
-class IndexView(generic.ListView):
+class IndexView(generic.ListView):  # 테이블에서 복수의 레코드를 가져와야하므로 ListView 이용
     template_name = 'polls/index.html'
     context_object_name = 'latest_question_list'
     # 자동으로 ListView는 context 변수로 question_list를 제공, 템플릿에 사용한 것과 같게 수정
 
-    def get_queryset(self):
+    def get_queryset(self): # 테이블에 들어있는 모든 레코드를 가져오는 경우 model 지정, 그렇지 않은 경우 get_queryset 오버라이딩
         """Return the last five published questions."""
-        return Question.objects.filter(pub_date__lte=timezone.now()).order_by('-pub_date')[:5]
-        # 현재 시점보다 생성일자가 작거나 같은 오브젝트 5개를 포함하는 쿼리셋 반환
+        return Question.objects.filter(pub_date__lte=timezone.now()).order_by('-pub_date')[:5]  
+        # 슬라이싱을 사용하면 쿼리셋이 아닌 리스트를 반환함 주의
+        # 현재 시점보다 생성일자가 작거나 같은 오브젝트 5개
+        # 쿼리셋: DB에서 꺼내 온 객체의 모음, filter, exclude 기능 가지고 쿼리셋으로 반환함
+        # object 객체는 테이블 정보를 갖고있는 객체로 쿼리셋을 얻어올 때 사용
 
-class DetailView(generic.DetailView):
-    model = Question
+class DetailView(generic.DetailView):   # 테이블에서 특정 한 개의 레코드를 가져와야하므로 DetailView 이용
+    model = Question    # 모델 지정하면 url에서 받은 pk로 알아서 특정 객체를 템플릿으로 넘겨줌
     template_name = 'polls/detail.html'
 
     def get_queryset(self):
@@ -28,6 +36,7 @@ class ResultsView(generic.DetailView):
     template_name = 'polls/results.html'
 
 def vote(request, question_id):
+    logger.debug("vote().question_id: %s" % question_id)
     question = get_object_or_404(Question, pk=question_id)
     try:
         selected_choice = question.choice_set.get(pk=request.POST['choice'])    # POST로 전달받은 값 중에 choice 항목의 value 반환 ex. request_POST = { 'choice' : 1}

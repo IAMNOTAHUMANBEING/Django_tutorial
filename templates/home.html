@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Django Application</h2>
+<ul>
+    <!-- app.py 별칭 활용 전 코드
+    {% for appname in app_list %}
+    {% with appname|add:":index" as urlvar %}
+    <li><a href="{% url urlvar %}">{{ appname }}</a></li>
+    {% endwith %}
+    {% endfor %}
+    -->
+    {% for key, value in verbose_dict.items %}
+        <li><a href="{% url key|add:':index' %}">{{ value }}</a></li>
+    {% endfor %}
+</ul>
+{% endblock content %}
